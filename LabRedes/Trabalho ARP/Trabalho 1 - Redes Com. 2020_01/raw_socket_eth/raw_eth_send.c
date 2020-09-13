@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
 	char hlen = 0x06;
 	char plen = 0x04;
 	short int op = htons(0x0001);
-	char sender_ip[] = {192,168,0,4};
-	char dest_ip[] = {192,168,0,2};
+	char sender_ip[] = {192,168,15,193};
+	char dest_ip[] = {192,168,15,2};
 
 	if (argc != 2) {
 		printf("Usage: %s iface\n", argv[0]);
