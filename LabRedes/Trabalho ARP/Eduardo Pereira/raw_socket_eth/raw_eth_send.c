@@ -29,9 +29,9 @@ int main(int argc, char *argv[])
 	char hwsize = 0x06;
 	char protsize = 0x04;
 	short int op = htons(0x0001);
-	char sender_ip[] = {192, 168, 15, 131};
+	char sender_ip[] = {10,0,2,20};//{192, 168, 15, 131};
 	char target_eth[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	char target_ip[] = {192, 168, 15, 182};
+	char target_ip[] = {10,0,2,0};//{192, 168, 15, 182};
 
 	if (argc != 2) {
 		printf("Usage: %s iface\n", argv[0]);
