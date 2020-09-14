@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 	unsigned char *data;
 	struct ifreq ifr;
 	char ifname[IFNAMSIZ];
-	char orig_ip[] = {192, 168, 15, 131};
+	char orig_ip[] = {10, 0, 2, 20};
 
 	if (argc != 2) {
 		printf("Usage: %s iface\n", argv[0]);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 		memcpy(ip_dst, reply+24, sizeof(ip_dst));
 		
 		if ((ethertype == ETHERTYPE && oprecieve == 2)
-			&& (131 == ip_dst[3]))
+			&& (20 == ip_dst[3]))
 			//&& (orig_ip[0] == ip_dst[0] && orig_ip[1] == ip_dst[1] && orig_ip[2] == ip_dst[2] && orig_ip[3] == ip_dst[3])) 
 		{
 			printf("IP: %d.%d.%d.%d\t", ip_src[0], ip_src[1], ip_src[2], ip_src[3]);
