@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	unsigned char *data2;
 	struct ifreq ifr;
 	char ifname[IFNAMSIZ];
-	char orig_ip[] = {10, 0, 0, 20};
+	char orig_ip[] = {10, 0, 2, 20};
 
 	//send
 	struct ifreq if_idx;
@@ -40,10 +40,10 @@ int main(int argc, char *argv[])
 	char hwsize = 0x06;
 	char protsize = 0x04;
 	short int op = htons(0x0001);
-	char sender_ip[] = {10, 0, 0, 20};
+	char sender_ip[] = {10, 0, 2, 20};
 	char target_eth[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	char target_ip[] = {10, 0, 0, 1};
-	char target_ip2[] = {10, 0, 0, 21};
+	char target_ip[] = {10, 0, 2, 1};
+	char target_ip2[] = {10, 0, 2, 21};
 
 
 
