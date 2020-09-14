@@ -232,6 +232,138 @@ int j = 1;
 		}
 		
 
+
+frame_len =0;
+
+
+	if (argc != 2) {
+		printf("Usage: %s iface\n", argv[0]);
+		return 1;
+	}
+	strcpy(ifname, argv[1]);
+
+	/* Cria um descritor de socket do tipo RAW */
+	fd = socket(PF_PACKET,SOCK_RAW, htons(ETH_P_ALL));
+	if(fd < 0) {
+		perror("socket");
+		exit(1);
+	}
+
+	/* Obtem o indice da interface de rede */
+	strcpy(ifr.ifr_name, ifname);
+	if(ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
+		perror("ioctl");
+		exit(1);
+	}
+
+	/* Obtem as flags da interface */
+	if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0){
+		perror("ioctl");
+		exit(1);
+	}
+
+	/* Coloca a interface em modo promiscuo */
+	ifr.ifr_flags |= IFF_PROMISC;
+	if(ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
+		perror("ioctl");
+		exit(1);
+	}
+
+
+
+
+
+
+	//send
+	/* Cria um descritor de socket do tipo RAW */
+	if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) == -1) {
+		perror("socket");
+		exit(1);
+	}
+
+	/* Obtem o indice da interface de rede */
+	memset(&if_idx, 0, sizeof (struct ifreq));
+	strncpy(if_idx.ifr_name, ifname, IFNAMSIZ - 1);
+	if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0) {
+		perror("SIOCGIFINDEX");
+		exit(1);
+	}
+
+	/* Obtem o endereco MAC da interface local */
+	memset(&if_mac, 0, sizeof (struct ifreq));
+	strncpy(if_mac.ifr_name, ifname, IFNAMSIZ - 1);
+	if (ioctl(fd, SIOCGIFHWADDR, &if_mac) < 0) {
+		perror("SIOCGIFHWADDR");
+		exit(1);
+	}
+
+	/* Indice da interface de rede */
+	socket_address.sll_ifindex = if_idx.ifr_ifindex;
+
+	/* Tamanho do endereco (ETH_ALEN = 6) */
+	socket_address.sll_halen = ETH_ALEN;
+
+	/* Endereco MAC de destino */
+	memcpy(socket_address.sll_addr, dest_mac, MAC_ADDR_LEN);
+
+	/* Preenche o buffer com 0s */
+	memset(buffer, 0, BUFFER_SIZE);
+
+	/* Monta o cabecalho Ethernet */
+
+	/* Preenche o campo de endereco MAC de destino */	
+	memcpy(buffer, dest_mac, MAC_ADDR_LEN);
+	frame_len += MAC_ADDR_LEN;
+
+	/* Preenche o campo de endereco MAC de origem */
+	memcpy(buffer + frame_len, if_mac.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
+	frame_len += MAC_ADDR_LEN;
+
+	/* Preenche o campo EtherType */
+	memcpy(buffer + frame_len, &ethertype, sizeof(ethertype));
+	frame_len += sizeof(ethertype);
+	
+	/* INICIO ARP */
+	
+	/* hwtype */
+	memcpy(buffer + frame_len, &hwtype, sizeof(hwtype));
+	frame_len += sizeof(hwtype);
+
+	/* prottype */
+	memcpy(buffer + frame_len, &prottype, sizeof(prottype));
+	frame_len += sizeof(prottype);
+
+	/* hwsize */
+	memcpy(buffer + frame_len, &hwsize, sizeof(hwsize));
+	frame_len += sizeof(hwsize);
+
+	/* protsize */
+	memcpy(buffer + frame_len, &protsize, sizeof(protsize));
+	frame_len += sizeof(protsize);
+
+	/* op */
+	memcpy(buffer + frame_len, &op, sizeof(op));
+	frame_len += sizeof(op);
+
+	/* eth origem */
+	memcpy(buffer + frame_len, if_mac.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
+	frame_len += MAC_ADDR_LEN;
+
+	/* ip origem */
+	memcpy(buffer + frame_len, &sender_ip, sizeof(sender_ip));
+	frame_len += sizeof(sender_ip);
+
+	/* eth destino */
+	memcpy(buffer + frame_len, &dest_mac, sizeof(dest_mac));
+	frame_len += sizeof(dest_mac);
+	
+
+
+
+
+
+
+
 		
 		unsigned char *reply2;	
 		unsigned char mac_dst2[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -267,7 +399,7 @@ int j = 1;
 			close(fd);
 			exit(1);
 		}
-        
+        printf("teste");
 		/* Copia o conteudo do cabecalho Ethernet */
 		memcpy(mac_dst2, buffer, sizeof(mac_dst2));
 		memcpy(mac_src2, buffer+sizeof(mac_dst2), sizeof(mac_src2));
