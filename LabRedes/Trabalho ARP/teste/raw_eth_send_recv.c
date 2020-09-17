@@ -44,7 +44,10 @@ int main(int argc, char *argv[])
 	char target_eth[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	char target_ip[] = {10, 0, 2, 1};
 	char target_ip2[] = {10, 0, 2, 21};
-
+	
+	
+	char mac_router[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	char mac_host[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 
 	if (argc != 2) {
@@ -229,6 +232,12 @@ int j = 1;
 			printf("MAC origem:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
                         mac_src[0], mac_src[1], mac_src[2], mac_src[3], mac_src[4], mac_src[5]);
 			printf("\n");
+			mac_router[0] = mac_src[0];
+			mac_router[1] = mac_src[1];
+			mac_router[2] = mac_src[2];
+			mac_router[3] = mac_src[3];
+			mac_router[4] = mac_src[4];
+			mac_router[5] = mac_src[5];
 		}
 		
 
@@ -423,6 +432,12 @@ frame_len =0;
 			printf("MAC origem:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
                         mac_src2[0], mac_src2[1], mac_src2[2], mac_src2[3], mac_src2[4], mac_src2[5]);
 			printf("\n");
+			mac_host[0] = mac_src2[0];
+			mac_host[1] = mac_src2[1];
+			mac_host[2] = mac_src2[2];
+			mac_host[3] = mac_src2[3];
+			mac_host[4] = mac_src2[4];
+			mac_host[5] = mac_src2[5];
 		}
 			
 		/*target_ip[3] = 78;
@@ -433,6 +448,24 @@ frame_len =0;
 		printf("IP: %d.%d.%d.%d\t  3 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
 		*/
 		
+
+
+
+printf("MAC Gateway:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
+                        mac_router[0], mac_router[1], mac_router[2], mac_router[3], mac_router[4], mac_router[5]);
+printf("\n");
+
+printf("MAC vitima:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
+                        mac_host[0], mac_host[1], mac_host[2], mac_host[3], mac_host[4], mac_host[5]);
+
+printf("\n");
+			
+
+
+
+
+
+
 
 	close(fd);
 	return 0;
